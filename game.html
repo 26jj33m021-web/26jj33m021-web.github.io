@@ -79,10 +79,14 @@ ball.y=H/2;
 ball.vx=0;ball.vy=0;
 red.vx=red.vy=blue.vx=blue.vy=0;
 if(next==='blue'){
-  blue.x=W-105;blue.y=H/2;
+  // 파랑팀이 지키는 오른쪽 골대 바로 앞에서 공을 두고 시작
+  blue.x=W-80;blue.y=H/2;
+  ball.x=W-125;ball.y=H/2;
   red.x=235;red.y=H/2;
 }else{
-  red.x=105;red.y=H/2;
+  // 빨강팀이 지키는 왼쪽 골대 바로 앞에서 공을 두고 시작
+  red.x=80;red.y=H/2;
+  ball.x=125;ball.y=H/2;
   blue.x=665;blue.y=H/2;
 }
 lastTouch=null;
