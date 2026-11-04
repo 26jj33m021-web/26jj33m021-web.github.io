@@ -34,11 +34,11 @@ canvas{display:block;width:100%;height:auto;border-radius:10px;background:#27884
 (()=>{
 const canvas=document.getElementById('field'),ctx=canvas.getContext('2d');
 const W=900,H=520,goalH=156,keys={};
-let redScore=0,blueScore=0,paused=false,finished=false,last=0;
+let redScore=0,blueScore=0,paused=false,finished=false,last=0,lastTouch=null;
 const red={x:235,y:H/2,r:23,color:'#f04444',vx:0,vy:0};
 const blue={x:665,y:H/2,r:23,color:'#3988ff',vx:0,vy:0};
 const ball={x:W/2,y:H/2,r:12,vx:0,vy:0};
-function resetPositions(){Object.assign(red,{x:235,y:H/2,vx:0,vy:0});Object.assign(blue,{x:665,y:H/2,vx:0,vy:0});Object.assign(ball,{x:W/2,y:H/2,vx:0,vy:0});}
+function resetPositions(){Object.assign(red,{x:235,y:H/2,vx:0,vy:0});Object.assign(blue,{x:665,y:H/2,vx:0,vy:0});Object.assign(ball,{x:W/2,y:H/2,vx:0,vy:0});lastTouch=null;}
 function restart(){redScore=0;blueScore=0;finished=false;paused=false;document.getElementById('pause').textContent='Ⅱ 일시정지';updateScore();resetPositions();}
 function updateScore(){document.getElementById('redScore').textContent=redScore;document.getElementById('blueScore').textContent=blueScore;}
 function draw(){
@@ -50,9 +50,17 @@ ctx.strokeRect(18,H/2-goalH/2,105,goalH);ctx.strokeRect(W-123,H/2-goalH/2,105,go
 ctx.fillStyle='#e8edf3';ctx.fillRect(0,H/2-goalH/2,18,goalH);ctx.fillRect(W-18,H/2-goalH/2,18,goalH);
 ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(18,H/2-goalH/2,28,goalH);ctx.fillRect(W-46,H/2-goalH/2,28,goalH);
 drawPlayer(red,'R');drawPlayer(blue,'B');
-ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#202a36';ctx.stroke();
-ctx.beginPath();ctx.moveTo(ball.x-7,ball.y);ctx.lineTo(ball.x+7,ball.y);ctx.moveTo(ball.x,ball.y-7);ctx.lineTo(ball.x,ball.y+7);ctx.strokeStyle='#27313d';ctx.lineWidth=2;ctx.stroke();
+drawSoccerBall();
 if(paused||finished){ctx.fillStyle='#071323aa';ctx.fillRect(0,0,W,H);ctx.fillStyle='white';ctx.textAlign='center';ctx.font='bold 42px Arial';ctx.fillText(finished?(redScore>blueScore?'🔴 빨강팀 승리!':'🔵 파랑팀 승리!'):'일시정지',W/2,H/2);ctx.font='20px Arial';ctx.fillText(finished?'다시 시작을 눌러 재경기!':'일시정지를 해제하고 계속해!',W/2,H/2+42);}
+}
+function drawSoccerBall(){
+ctx.save();ctx.translate(ball.x,ball.y);
+ctx.beginPath();ctx.arc(0,0,ball.r,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.clip();
+ctx.fillStyle='#202a36';
+function pentagon(cx,cy,r,rotation=0){ctx.beginPath();for(let i=0;i<5;i++){let a=rotation+i*Math.PI*2/5-Math.PI/2,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath();ctx.fill();}
+pentagon(0,0,4.8,0);
+for(let i=0;i<5;i++){let a=i*Math.PI*2/5-Math.PI/2;pentagon(Math.cos(a)*8.2,Math.sin(a)*8.2,3.3,a);}
+ctx.restore();ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.lineWidth=1.5;ctx.strokeStyle='#202a36';ctx.stroke();
 }
 function drawPlayer(p,label){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='white';ctx.stroke();ctx.fillStyle='white';ctx.font='bold 17px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,p.x,p.y+1);}
 function movePlayer(p,up,down,left,right,dt){
@@ -60,18 +68,31 @@ let dx=(keys[right]?1:0)-(keys[left]?1:0),dy=(keys[down]?1:0)-(keys[up]?1:0),len
 const speed=235;p.x+=dx/len*speed*dt;p.y+=dy/len*speed*dt;
 p.x=Math.max(42,Math.min(W-42,p.x));p.y=Math.max(42,Math.min(H-42,p.y));
 }
-function kick(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy);if(d<65){let l=d||1;ball.vx=dx/l*480;ball.vy=dy/l*480;}}
-function collide(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy),min=p.r+ball.r;if(d<min){let l=d||1,nx=dx/l,ny=dy/l;ball.x=p.x+nx*min;ball.y=p.y+ny*min;ball.vx+=nx*90+p.vx*.22;ball.vy+=ny*90+p.vy*.22;}}
+function kick(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy);if(d<65){let l=d||1;ball.vx=dx/l*480;ball.vy=dy/l*480;lastTouch=p===red?'red':'blue';}}
+function collide(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy),min=p.r+ball.r;if(d<min){let l=d||1,nx=dx/l,ny=dy/l;ball.x=p.x+nx*min;ball.y=p.y+ny*min;ball.vx+=nx*90+p.vx*.22;ball.vy+=ny*90+p.vy*.22;lastTouch=p===red?'red':'blue';}}
 function goal(team){if(team==='red')redScore++;else blueScore++;updateScore();if(redScore>=5||blueScore>=5)finished=true;resetPositions();}
+function restartFromLine(x,y){
+const next=lastTouch==='red'?'blue':'red';
+ball.x=Math.max(ball.r+18,Math.min(W-ball.r-18,x));
+ball.y=Math.max(ball.r+18,Math.min(H-ball.r-18,y));
+ball.vx=0;ball.vy=0;
+red.vx=red.vy=blue.vx=blue.vy=0;
+if(next==='blue'){blue.x=Math.max(55,Math.min(W-55,ball.x-38));blue.y=ball.y;red.x=235;red.y=H/2;}
+else{red.x=Math.max(55,Math.min(W-55,ball.x+38));red.y=ball.y;blue.x=665;blue.y=H/2;}
+lastTouch=null;
+}
 function update(dt){
 movePlayer(red,'w','s','a','d',dt);movePlayer(blue,'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',dt);
 collide(red);collide(blue);
 ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;const drag=Math.pow(.985,dt*60);ball.vx*=drag;ball.vy*=drag;
 if(Math.abs(ball.vx)<3)ball.vx=0;if(Math.abs(ball.vy)<3)ball.vy=0;
-if(ball.y<ball.r+18){ball.y=ball.r+18;ball.vy=Math.abs(ball.vy)*.78;}if(ball.y>H-ball.r-18){ball.y=H-ball.r-18;ball.vy=-Math.abs(ball.vy)*.78;}
 const inGoal=ball.y>H/2-goalH/2+5&&ball.y<H/2+goalH/2-5;
-if(ball.x<ball.r+18){if(inGoal){goal('blue');return;}ball.x=ball.r+18;ball.vx=Math.abs(ball.vx)*.78;}
-if(ball.x>W-ball.r-18){if(inGoal){goal('red');return;}ball.x=W-ball.r-18;ball.vx=-Math.abs(ball.vx)*.78;}
+if(ball.x<18&&inGoal){goal('blue');return;}
+if(ball.x>W-18&&inGoal){goal('red');return;}
+if(ball.y<18){restartFromLine(ball.x,18);return;}
+if(ball.y>H-18){restartFromLine(ball.x,H-18);return;}
+if(ball.x<18){restartFromLine(18,ball.y);return;}
+if(ball.x>W-18){restartFromLine(W-18,ball.y);return;}
 }
 function loop(t){let dt=Math.min((t-last)/1000||0,.03);last=t;if(!paused&&!finished)update(dt);draw();requestAnimationFrame(loop);}
 window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter'].includes(e.key))e.preventDefault();keys[e.key.length===1?e.key.toLowerCase():e.key]=true;if(e.repeat)return;if(e.code==='Space')kick(red);if(e.key==='Enter')kick(blue);});
