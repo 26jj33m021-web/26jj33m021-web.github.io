@@ -73,12 +73,18 @@ function collide(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy),min=p.r+
 function goal(team){if(team==='red')redScore++;else blueScore++;updateScore();if(redScore>=5||blueScore>=5)finished=true;resetPositions();}
 function restartFromLine(x,y){
 const next=lastTouch==='red'?'blue':'red';
-ball.x=Math.max(ball.r+18,Math.min(W-ball.r-18,x));
-ball.y=Math.max(ball.r+18,Math.min(H-ball.r-18,y));
+// 아웃되면 공을 상대 팀이 아니라, 공을 받는 팀의 자기 골대 앞에 둔다.
+ball.x=next==='blue'?W-145:145;
+ball.y=H/2;
 ball.vx=0;ball.vy=0;
 red.vx=red.vy=blue.vx=blue.vy=0;
-if(next==='blue'){blue.x=Math.max(55,Math.min(W-55,ball.x-38));blue.y=ball.y;red.x=235;red.y=H/2;}
-else{red.x=Math.max(55,Math.min(W-55,ball.x+38));red.y=ball.y;blue.x=665;blue.y=H/2;}
+if(next==='blue'){
+  blue.x=W-105;blue.y=H/2;
+  red.x=235;red.y=H/2;
+}else{
+  red.x=105;red.y=H/2;
+  blue.x=665;blue.y=H/2;
+}
 lastTouch=null;
 }
 function update(dt){
