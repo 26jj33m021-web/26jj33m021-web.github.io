@@ -9,32 +9,32 @@
 header{padding:17px max(18px,calc((100% - 1000px)/2));display:flex;justify-content:space-between;align-items:center;background:#14213d}
 header strong{font-size:20px}nav a{color:#fff;text-decoration:none;padding:9px 14px;border-radius:9px}nav a.active,nav a:hover{background:#2d416b}
 main{max-width:1000px;margin:28px auto;padding:0 16px}.top{text-align:center;margin-bottom:18px}.top h1{margin:0 0 8px;font-size:clamp(25px,5vw,36px)}.top p{color:#b9c6d9;margin:0}
-.scoreboard{display:flex;justify-content:center;align-items:center;gap:25px;margin:18px 0;font-weight:800;font-size:22px}.red{color:#ff6464}.blue{color:#65a7ff}.score{font-size:34px;color:white}
+.scoreboard{display:flex;justify-content:center;align-items:center;gap:25px;margin:18px 0 8px;font-weight:800;font-size:22px}.match-info{display:flex;justify-content:center;gap:22px;margin:0 0 18px;font-size:19px;font-weight:800;color:#ffd166}.match-info span{background:#1c2c43;padding:8px 16px;border-radius:10px}.red{color:#ff6464}.blue{color:#65a7ff}.score{font-size:34px;color:white}
 .field-wrap{background:#1c2c43;padding:12px;border-radius:18px;box-shadow:0 12px 35px #0005}
 canvas{display:block;width:100%;height:auto;border-radius:10px;background:#27884c;touch-action:none}
 .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:18px 0}.controls button{border:0;border-radius:11px;padding:12px 20px;font-weight:800;font-size:15px;cursor:pointer}.restart{background:#ffd166;color:#172033}.help{background:#334761;color:white}
 .instructions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.card{background:#1c2c43;padding:16px;border-radius:13px;line-height:1.7}.card h3{margin:0 0 5px}.note{text-align:center;color:#aebbd0;font-size:13px;margin:16px 0 30px}
-@media(max-width:550px){.instructions{grid-template-columns:1fr}.scoreboard{gap:13px}.score{font-size:28px}.controls button{padding:11px 14px}}
+@media(max-width:550px){.instructions{grid-template-columns:1fr}.scoreboard{gap:13px}.score{font-size:28px}.match-info{font-size:17px}.controls button{padding:11px 14px}}
 </style>
 </head>
 <body>
 <header><strong>⚽ MY WEBSITE</strong><nav><a href="index.html">홈</a><a class="active" href="game.html">게임</a></nav></header>
 <main>
 <div class="top"><h1>1대1 미니 축구</h1><p>친구와 함께 상대 팀 골대에 공을 넣어 봐!</p></div>
-<div class="scoreboard"><span class="red">빨강팀</span><span class="score" id="redScore">0</span><span>:</span><span class="score" id="blueScore">0</span><span class="blue">파랑팀</span></div>
+<div class="scoreboard"><span class="red">빨강팀</span><span class="score" id="redScore">0</span><span>:</span><span class="score" id="blueScore">0</span><span class="blue">파랑팀</span></div>\n<div class="match-info"><span id="quarter">1쿼터</span><span id="timer">03:00</span></div>
 <div class="field-wrap"><canvas id="field" width="900" height="520" aria-label="축구 경기장"></canvas></div>
 <div class="controls"><button class="restart" id="restart">↻ 다시 시작</button><button class="help" id="pause">Ⅱ 일시정지</button></div>
 <div class="instructions">
 <div class="card"><h3 class="red">🔴 빨강팀</h3>이동: <b>W A S D</b><br>슛: <b>Space</b></div>
 <div class="card"><h3 class="blue">🔵 파랑팀</h3>이동: <b>방향키 ↑ ↓ ← →</b><br>슛: <b>Enter</b></div>
 </div>
-<p class="note">먼저 5골을 넣으면 승리! 선수 가까이에서 슛 키를 누르면 공을 찰 수 있어.</p>
+<p class="note">3분씩 총 3쿼터 경기야. 3쿼터가 끝났을 때 점수가 높은 팀이 승리해! 선수 가까이에서 슛 키를 누르면 공을 찰 수 있어.</p>
 </main>
 <script>
 (()=>{
 const canvas=document.getElementById('field'),ctx=canvas.getContext('2d');
 const W=900,H=520,goalH=156,keys={};
-let redScore=0,blueScore=0,paused=false,finished=false,last=0,lastTouch=null;
+let redScore=0,blueScore=0,quarter=1,timeLeft=180,paused=false,finished=false,last=0,lastTouch=null;
 const red={x:235,y:H/2,r:23,color:'#f04444',vx:0,vy:0};
 const blue={x:665,y:H/2,r:23,color:'#3988ff',vx:0,vy:0};
 const ball={x:W/2,y:H/2,r:12,vx:0,vy:0};
@@ -51,7 +51,7 @@ ctx.fillStyle='#e8edf3';ctx.fillRect(0,H/2-goalH/2,18,goalH);ctx.fillRect(W-18,H
 ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(18,H/2-goalH/2,28,goalH);ctx.fillRect(W-46,H/2-goalH/2,28,goalH);
 drawPlayer(red,'R');drawPlayer(blue,'B');
 drawSoccerBall();
-if(paused||finished){ctx.fillStyle='#071323aa';ctx.fillRect(0,0,W,H);ctx.fillStyle='white';ctx.textAlign='center';ctx.font='bold 42px Arial';ctx.fillText(finished?(redScore>blueScore?'🔴 빨강팀 승리!':'🔵 파랑팀 승리!'):'일시정지',W/2,H/2);ctx.font='20px Arial';ctx.fillText(finished?'다시 시작을 눌러 재경기!':'일시정지를 해제하고 계속해!',W/2,H/2+42);}
+if(paused||finished){ctx.fillStyle='#071323aa';ctx.fillRect(0,0,W,H);ctx.fillStyle='white';ctx.textAlign='center';ctx.font='bold 42px Arial';ctx.fillText(finished?(redScore>blueScore?'🔴 빨강팀 승리!':blueScore>redScore?'🔵 파랑팀 승리!':'🤝 무승부!'):'일시정지',W/2,H/2);ctx.font='20px Arial';ctx.fillText(finished?'3쿼터 종료! 다시 시작을 눌러 재경기!':'일시정지를 해제하고 계속해!',W/2,H/2+42);}
 }
 function drawSoccerBall(){
 ctx.save();ctx.translate(ball.x,ball.y);
@@ -70,7 +70,7 @@ p.x=Math.max(42,Math.min(W-42,p.x));p.y=Math.max(42,Math.min(H-42,p.y));
 }
 function kick(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy);if(d<65){let l=d||1;ball.vx=dx/l*480;ball.vy=dy/l*480;lastTouch=p===red?'red':'blue';}}
 function collide(p){let dx=ball.x-p.x,dy=ball.y-p.y,d=Math.hypot(dx,dy),min=p.r+ball.r;if(d<min){let l=d||1,nx=dx/l,ny=dy/l;ball.x=p.x+nx*min;ball.y=p.y+ny*min;ball.vx+=nx*90+p.vx*.22;ball.vy+=ny*90+p.vy*.22;lastTouch=p===red?'red':'blue';}}
-function goal(team){if(team==='red')redScore++;else blueScore++;updateScore();if(redScore>=5||blueScore>=5)finished=true;resetPositions();}
+function goal(team){if(team==='red')redScore++;else blueScore++;updateScore();resetPositions();}
 function restartFromLine(x,y){
 const next=lastTouch==='red'?'blue':'red';
 // 아웃되면 공을 상대 팀이 아니라, 공을 받는 팀의 자기 골대 앞에 둔다.
@@ -109,7 +109,7 @@ window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','Arr
 window.addEventListener('keyup',e=>{keys[e.key.length===1?e.key.toLowerCase():e.key]=false;});
 document.getElementById('restart').addEventListener('click',restart);
 document.getElementById('pause').addEventListener('click',()=>{if(finished)return;paused=!paused;document.getElementById('pause').textContent=paused?'▶ 계속하기':'Ⅱ 일시정지';});
-updateScore();requestAnimationFrame(loop);
+updateScore();updateClock();requestAnimationFrame(loop);
 })();
 </script>
 </body>
