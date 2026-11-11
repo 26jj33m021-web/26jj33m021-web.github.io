@@ -9,7 +9,7 @@
 header{padding:17px max(18px,calc((100% - 1000px)/2));display:flex;justify-content:space-between;align-items:center;background:#14213d}
 header strong{font-size:20px}nav a{color:#fff;text-decoration:none;padding:9px 14px;border-radius:9px}nav a.active,nav a:hover{background:#2d416b}
 main{max-width:1000px;margin:28px auto;padding:0 16px}.top{text-align:center;margin-bottom:18px}.top h1{margin:0 0 8px;font-size:clamp(25px,5vw,36px)}.top p{color:#b9c6d9;margin:0}
-.scoreboard{display:flex;justify-content:center;align-items:center;gap:25px;margin:18px 0 8px;font-weight:800;font-size:22px}.match-info{display:flex;justify-content:center;gap:22px;margin:0 0 18px;font-size:19px;font-weight:800;color:#ffd166}.match-info span{background:#1c2c43;padding:8px 16px;border-radius:10px}.red{color:#ff6464}.blue{color:#65a7ff}.score{font-size:34px;color:white}
+.scoreboard{display:flex;justify-content:center;align-items:center;gap:25px;margin:8px 0 18px;font-weight:800;font-size:22px}.match-info{display:flex;justify-content:center;gap:14px;margin:18px 0 8px;font-size:19px;font-weight:800;color:#ffd166}.match-info span{background:#1c2c43;padding:8px 16px;border-radius:10px}.red{color:#ff6464}.blue{color:#65a7ff}.score{font-size:34px;color:white}
 .field-wrap{background:#1c2c43;padding:12px;border-radius:18px;box-shadow:0 12px 35px #0005}
 canvas{display:block;width:100%;height:auto;border-radius:10px;background:#27884c;touch-action:none}
 .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:18px 0}.controls button{border:0;border-radius:11px;padding:12px 20px;font-weight:800;font-size:15px;cursor:pointer}.restart{background:#ffd166;color:#172033}.help{background:#334761;color:white}
@@ -21,7 +21,8 @@ canvas{display:block;width:100%;height:auto;border-radius:10px;background:#27884
 <header><strong>⚽ MY WEBSITE</strong><nav><a href="index.html">홈</a><a class="active" href="game.html">게임</a></nav></header>
 <main>
 <div class="top"><h1>1대1 미니 축구</h1><p>친구와 함께 상대 팀 골대에 공을 넣어 봐!</p></div>
-<div class="scoreboard"><span class="red">빨강팀</span><span class="score" id="redScore">0</span><span>:</span><span class="score" id="blueScore">0</span><span class="blue">파랑팀</span></div>\n<div class="match-info"><span id="quarter">1쿼터</span><span id="timer">03:00</span></div>
+<div class="match-info"><span id="quarter">1쿼터</span><span id="timer">03:00</span></div>
+<div class="scoreboard"><span class="red">빨강팀</span><span class="score" id="redScore">0</span><span>:</span><span class="score" id="blueScore">0</span><span class="blue">파랑팀</span></div>
 <div class="field-wrap"><canvas id="field" width="900" height="520" aria-label="축구 경기장"></canvas></div>
 <div class="controls"><button class="restart" id="restart">↻ 다시 시작</button><button class="help" id="pause">Ⅱ 일시정지</button></div>
 <div class="instructions">
@@ -39,7 +40,8 @@ const red={x:235,y:H/2,r:23,color:'#f04444',vx:0,vy:0};
 const blue={x:665,y:H/2,r:23,color:'#3988ff',vx:0,vy:0};
 const ball={x:W/2,y:H/2,r:12,vx:0,vy:0};
 function resetPositions(){Object.assign(red,{x:235,y:H/2,vx:0,vy:0});Object.assign(blue,{x:665,y:H/2,vx:0,vy:0});Object.assign(ball,{x:W/2,y:H/2,vx:0,vy:0});lastTouch=null;}
-function restart(){redScore=0;blueScore=0;finished=false;paused=false;document.getElementById('pause').textContent='Ⅱ 일시정지';updateScore();resetPositions();}
+function restart(){redScore=0;blueScore=0;quarter=1;timeLeft=180;finished=false;paused=false;document.getElementById('pause').textContent='Ⅱ 일시정지';updateScore();updateClock();resetPositions();}
+function updateClock(){document.getElementById('quarter').textContent=quarter+'쿼터';const m=Math.floor(timeLeft/60),s=Math.floor(timeLeft%60);document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function updateScore(){document.getElementById('redScore').textContent=redScore;document.getElementById('blueScore').textContent=blueScore;}
 function draw(){
 ctx.clearRect(0,0,W,H);ctx.fillStyle='#27884c';ctx.fillRect(0,0,W,H);
