@@ -29,7 +29,7 @@ canvas{display:block;width:100%;height:auto;min-height:260px;border-radius:10px;
 <div class="card"><h3 class="red">🔴 빨강팀</h3>이동: <b>W A S D</b><br>슛: <b>Space</b></div>
 <div class="card"><h3 class="blue">🔵 파랑팀</h3>이동: <b>방향키 ↑ ↓ ← →</b><br>슛: <b>Enter</b></div>
 </div>
-<p class="note">3분씩 총 3쿼터 경기야. 3쿼터가 끝났을 때 점수가 높은 팀이 승리해! 선수 가까이에서 슛 키를 누르면 공을 찰 수 있어.</p>
+<p class="note">각 쿼터는 3분이고 무승부면 1분 연장해. 쿼터별 승리 동그라미가 더 많은 팀이 최종 승리해! 선수 가까이에서 슛 키를 누르면 공을 찰 수 있어.</p>
 </main>
 <script>
 (()=>{
@@ -41,7 +41,7 @@ const blue={x:665,y:H/2,r:23,color:'#3988ff',vx:0,vy:0};
 const ball={x:W/2,y:H/2,r:12,vx:0,vy:0};
 function resetPositions(){Object.assign(red,{x:235,y:H/2,vx:0,vy:0});Object.assign(blue,{x:665,y:H/2,vx:0,vy:0});Object.assign(ball,{x:W/2,y:H/2,vx:0,vy:0});lastTouch=null;}
 function restart(){redScore=0;blueScore=0;redWins=0;blueWins=0;quarter=1;timeLeft=180;quarterRedGoals=0;quarterBlueGoals=0;extraTimeUsed=false;finished=false;paused=false;document.getElementById('pause').textContent='Ⅱ 일시정지';updateScore();updateClock();updateDots();resetPositions();}
-function updateClock(){document.getElementById('quarter').textContent=quarter+'쿼터';const m=Math.floor(timeLeft/60),s=Math.floor(timeLeft%60);document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function updateClock(){document.getElementById('quarter').textContent=quarter+'쿼터'+(extraTimeUsed?' 연장전':'');const m=Math.floor(timeLeft/60),s=Math.floor(timeLeft%60);document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function updateScore(){document.getElementById('redScore').textContent=redScore;document.getElementById('blueScore').textContent=blueScore;}
 function updateDots(){[...document.querySelectorAll("#redDots .quarter-dot")].forEach((d,i)=>d.classList.toggle("filled",i<redWins));[...document.querySelectorAll("#blueDots .quarter-dot")].forEach((d,i)=>d.classList.toggle("filled",i<blueWins));}
 function finishQuarter(){if(quarterRedGoals>quarterBlueGoals)redWins++;else if(quarterBlueGoals>quarterRedGoals)blueWins++;updateDots();if(quarter>=3){finished=true;return;}quarter++;timeLeft=180;quarterRedGoals=0;quarterBlueGoals=0;extraTimeUsed=false;resetPositions();updateClock();}
