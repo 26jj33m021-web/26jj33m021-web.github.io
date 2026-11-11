@@ -44,7 +44,7 @@ function restart(){redScore=0;blueScore=0;redWins=0;blueWins=0;quarter=1;timeLef
 function updateClock(){document.getElementById('quarter').textContent=quarter+'쿼터'+(extraTimeUsed?' 연장전':'');const m=Math.floor(timeLeft/60),s=Math.floor(timeLeft%60);document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function updateScore(){document.getElementById('redScore').textContent=redScore;document.getElementById('blueScore').textContent=blueScore;}
 function updateDots(){[...document.querySelectorAll("#redDots .quarter-dot")].forEach((d,i)=>d.classList.toggle("filled",i<redWins));[...document.querySelectorAll("#blueDots .quarter-dot")].forEach((d,i)=>d.classList.toggle("filled",i<blueWins));}
-function finishQuarter(){if(quarterRedGoals>quarterBlueGoals)redWins++;else if(quarterBlueGoals>quarterRedGoals)blueWins++;updateDots();if(quarter>=3){finished=true;return;}quarter++;timeLeft=180;quarterRedGoals=0;quarterBlueGoals=0;extraTimeUsed=false;resetPositions();updateClock();}
+function finishQuarter(){if(quarterRedGoals>quarterBlueGoals)redWins++;else if(quarterBlueGoals>quarterRedGoals)blueWins++;updateDots();if(quarter>=3){finished=true;return;}quarter++;redScore=0;blueScore=0;timeLeft=180;quarterRedGoals=0;quarterBlueGoals=0;extraTimeUsed=false;updateScore();resetPositions();updateClock();}
 function draw(){
 ctx.clearRect(0,0,W,H);ctx.fillStyle='#27884c';ctx.fillRect(0,0,W,H);
 ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=4;ctx.strokeRect(18,18,W-36,H-36);
